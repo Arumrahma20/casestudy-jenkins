@@ -4,8 +4,8 @@ pipeline {
   environment {
     IMAGE = "mitsukio/demo-app"
     TAG = "latest"
-    DOCKER_CRED = "docker-hub"
-    KUBECONFIG_CRED = "kubeconfig-dev"
+    DOCKER_CRED = "docker-hub"        // Harus dibuat di Jenkins (Username+Password DockerHub)
+    KUBECONFIG_CRED = "kubeconfig-dev" // Harus dibuat di Jenkins (Secret file: kubeconfig)
     NAMESPACE = "default"
     HELM_RELEASE = "casestudy-jenkins1"
   }
@@ -21,7 +21,7 @@ pipeline {
       steps {
         script {
           echo "🛠️ Building image ${IMAGE}:${TAG}..."
-          def builtImage = docker.build("${IMAGE}:${TAG}")
+          docker.build("${IMAGE}:${TAG}")
         }
       }
     }
@@ -29,7 +29,7 @@ pipeline {
     stage('Push Docker Image') {
       steps {
         withCredentials([usernamePassword(
-          credentialsId: "docker-hub",
+          credentialsId: "${DOCKER_CRED}",
           usernameVariable: 'USER',
           passwordVariable: 'PASS'
         )]) {
@@ -49,13 +49,13 @@ pipeline {
         withCredentials([file(credentialsId: "${KUBECONFIG_CRED}", variable: 'KUBE_FILE')]) {
           script {
             echo "🚀 Deploying to Kubernetes via Helm..."
-            sh '''
+            sh """
               export KUBECONFIG=$KUBE_FILE
               helm upgrade --install $HELM_RELEASE ./helm \
                 --set image.repository=$IMAGE \
                 --set image.tag=$TAG \
                 --namespace $NAMESPACE --create-namespace
-            '''
+            """
           }
         }
       }

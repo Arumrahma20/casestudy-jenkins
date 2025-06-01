@@ -21,7 +21,7 @@ pipeline {
       steps {
         script {
           echo "🛠️ Building image ${IMAGE}:${TAG}..."
-          def builtImage = docker.build("${IMAGE}:${TAG}")
+          sh "docker build -t ${IMAGE}:${TAG} ."
         }
       }
     }
@@ -29,7 +29,7 @@ pipeline {
     stage('Push Docker Image') {
       steps {
         withCredentials([usernamePassword(
-          credentialsId: "docker-hub",
+          credentialsId: "${DOCKER_CRED}",
           usernameVariable: 'USER',
           passwordVariable: 'PASS'
         )]) {
@@ -49,13 +49,13 @@ pipeline {
         withCredentials([file(credentialsId: "${KUBECONFIG_CRED}", variable: 'KUBE_FILE')]) {
           script {
             echo "🚀 Deploying to Kubernetes via Helm..."
-            sh '''
+            sh """
               export KUBECONFIG=$KUBE_FILE
-              helm upgrade --install $HELM_RELEASE ./helm \
-                --set image.repository=$IMAGE \
-                --set image.tag=$TAG \
-                --namespace $NAMESPACE --create-namespace
-            '''
+              helm upgrade --install ${HELM_RELEASE} ./helm \
+                --set image.repository=${IMAGE} \
+                --set image.tag=${TAG} \
+                --namespace ${NAMESPACE} --create-namespace
+            """
           }
         }
       }

@@ -5,7 +5,7 @@ pipeline {
     IMAGE = "mitsukio/demo-app"
     TAG = "latest"
     DOCKER_CRED = "docker-hub"
-    KUBECONFIG_CRED = "kubeconfig-dev"
+    KUBECONFIG_CRED = "kubeconfig"
     NAMESPACE = "default"
     HELM_RELEASE = "deploy-jenkins"
   }

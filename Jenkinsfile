@@ -21,6 +21,7 @@ pipeline {
       steps {
         script {
           echo "🛠️ Building image ${IMAGE}:${TAG}..."
+          // Build Docker image menggunakan docker pipeline plugin
           def builtImage = docker.build("${IMAGE}:${TAG}")
         }
       }
@@ -29,7 +30,7 @@ pipeline {
     stage('Push Docker Image') {
       steps {
         withCredentials([usernamePassword(
-          credentialsId: "docker-hub",
+          credentialsId: "${DOCKER_CRED}",
           usernameVariable: 'USER',
           passwordVariable: 'PASS'
         )]) {
@@ -38,6 +39,7 @@ pipeline {
             sh """
               echo "$PASS" | docker login -u "$USER" --password-stdin
               docker push ${IMAGE}:${TAG}
+              docker logout
             """
           }
         }

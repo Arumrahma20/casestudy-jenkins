@@ -62,4 +62,12 @@ pipeline {
     }
   }
 
-  
+  post {
+    success {
+      echo "✅ Pipeline Sukses: Aplikasi berhasil dideploy ke Kubernetes"
+    }
+    failure {
+      echo "❌ Pipeline Gagal: Cek log untuk mengetahui error"
+    }
+  }
+}

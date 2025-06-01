@@ -21,8 +21,8 @@ pipeline {
       steps {
         script {
           echo "🛠️ Building image ${IMAGE}:${TAG}..."
-          // Build Docker image menggunakan docker pipeline plugin
-          def builtImage = docker.build("${IMAGE}:${TAG}")
+          // Build Docker image
+          docker.build("${IMAGE}:${TAG}")
         }
       }
     }

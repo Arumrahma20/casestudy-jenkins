@@ -21,8 +21,7 @@ pipeline {
       steps {
         script {
           echo "🛠️ Building image ${IMAGE}:${TAG}..."
-          // Build Docker image
-          docker.build("${IMAGE}:${TAG}")
+          def builtImage = docker.build("${IMAGE}:${TAG}")
         }
       }
     }
@@ -30,7 +29,7 @@ pipeline {
     stage('Push Docker Image') {
       steps {
         withCredentials([usernamePassword(
-          credentialsId: "${DOCKER_CRED}",
+          credentialsId: "docker-hub",
           usernameVariable: 'USER',
           passwordVariable: 'PASS'
         )]) {
@@ -39,7 +38,6 @@ pipeline {
             sh """
               echo "$PASS" | docker login -u "$USER" --password-stdin
               docker push ${IMAGE}:${TAG}
-              docker logout
             """
           }
         }
@@ -64,12 +62,4 @@ pipeline {
     }
   }
 
-  post {
-    success {
-      echo "✅ Pipeline Sukses: Aplikasi berhasil dideploy ke Kubernetes"
-    }
-    failure {
-      echo "❌ Pipeline Gagal: Cek log untuk mengetahui error"
-    }
-  }
-}
+  
